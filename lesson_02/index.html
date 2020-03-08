@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>品牌管理</title>
+    <script src="../lib/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script> -->
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">品牌管理</h3>
+            </div>
+            <div class="panel-body form-inline">
+                <label for="">Id:
+                    <input type="text" name="" id="" class="form-control" v-model='id'>
+                </label>
+
+                <label for="">Name:
+                    <!-- <input type="text" name="" id="" class="form-control" v-model='name'>  -->
+                    <!-- 键盘修饰符： -->
+                    <input type="text" name="" id="" class="form-control" v-model='name' @keyup.enter='add()'>
+                </label>
+                <input type="button" value="添加" class="btn btn-primary" @click='add()'>
+                <!-- vue 中绑定事件加括号可以在括号中传参 -->
+
+                <label for="">搜索品牌:
+                    <!-- <input type="text" name="" id="search" class="form-control" v-model='key' v-focus v-color> -->
+                    <!-- 自定义指令时，通过binding对象中属性获取 -->
+                    <input type="text" name="" id="search" class="form-control" v-model='key' v-focus v-color="'blue'">
+                </label>
+
+            </div>
+        </div>
+
+
+
+        <table class="table table-bordered table-">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Ctime</th>
+                    <th>Operation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- <tr v-for="item in list" :key="item.id"> -->
+                <tr v-for="item in search(key)" :key="item.id">
+                    <td v-text="item.id"></td>
+                    <td>{{item.name}}</td>
+                    <!-- <td v-text="item.ctime"></td> -->
+                    <td>{{ item.ctime | dateFormat }}</td>
+                    <td>
+                        <a href="http://" target="_blank" rel="noopener noreferrer" @click.prevent='del(item.id)'>删除</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 自动获取焦点到搜索框
+        // 操作DOM实现
+        // document.getElementById('search').focus();
+        // 自定义指令实现
+        // 参数1为指令名称， 不需要加'-' ,调用时需要加; 参数2为一个对象，这个对象有一些指令相关的函数，这些函数可以在特定的阶段进行执行。
+        Vue.directive('focus', {
+            bind: function(el){
+                // 每当执行绑定到元素上时，回立即执行这个bind函数（仅执行一次）
+                // 每个阶段函数的第一个参数固定为el， 表示被绑定了指令的那个元素，为js原生对象
+                // 在元素刚刚绑定时，调用focus方法没用
+            },
+            inserted: function(el){
+                // 当该元素插入DOM树中时执行该inserted函数，触发一次
+                el.focus();
+            },
+            updated: function(el){
+                // 当VNode更新时执行该updated函数，可能会触发多次
+            }
+        })    
+
+        Vue.directive('color', {
+            bind: function(el, binding){
+                // 和样式相关不管是否插入DOM树，浏览器必然会渲染该元素：与事件相关，放在inserted函数，与样式相关方bind函数。
+                // 
+                // el.style.color = 'red';
+                // 第二个参数为一个对象，可以通过该对象获取绑定时传递给自定义指令的参数值。
+                el.style.color = binding.value;
+            }
+        })
+
+        // 定义全局过滤器, 所有的vm控制区域均能使用
+        Vue.filter('dateFormat', function (dateStr, pattern = "") {
+            var dt = new Date(dateStr);
+
+            // 使用ES6中的字符串新方法 String.prototype.padStart(maxLength, fillString='') 或 String.prototype.padEnd(maxLength, fillString='')来填充字符串；
+
+            var y = dt.getFullYear();
+            // var m = dt.getMonth();
+            var m = (dt.getMonth() + 1).toString().padStart(2, '0');
+            // var d = dt.getDay();
+            var d = dt.getDay().toString().padStart(2, '0');
+
+            // return y + '-' + m + '-' + d
+            // return `${y}-${m}-${d}`
+
+            if (pattern.toLowerCase() === "yyyy-mm-dd") {
+                return `${y}-${m}-${d}`
+            } else {
+                var hh = dt.getHours();
+                // var mm = dt.getMinutes();
+                var mm = dt.getMinutes().toString().padStart(2, '0');
+                // var s = dt.getSeconds();
+                var s = dt.getSeconds().toString().padStart(2, '0');
+                return `${y}-${m}-${d}-${hh}:${mm}:${s}`
+
+            }
+
+
+        })
+
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                list: [{
+                        id: 1,
+                        name: '奔驰',
+                        ctime: new Date()
+                    },
+                    {
+                        id: 2,
+                        name: '宝马',
+                        ctime: new Date()
+                    },
+                    {
+                        id: 3,
+                        name: '奥迪',
+                        ctime: new Date()
+                    }
+                ],
+                id: '',
+                name: '',
+                key: ''
+            },
+            methods: {
+                add() {
+                    var car = {
+                        id: this.id,
+                        name: this.name,
+                        ctime: new Date()
+                    };
+                    this.list.push(car);
+                },
+                del(id) {
+                    //  list.some 方法如果return true 则立即回结束循环
+                    //    this.list.some((item, i)=>{
+                    //        if(item.id === id){
+                    //            this.list.splice(i, 1);
+                    //            return true;
+                    //        }
+                    //    })
+
+                    var i = this.list.findIndex(item => {
+                        if (item.if == id) {
+                            return ture;
+                        }
+                    })
+                    this.list.splice(i, 1);
+
+
+                },
+                search(key) {
+                    //    var newList = []
+                    //    this.list.forEach(element => {
+                    //        if (element.name.indexOf(key) != -1){
+                    //             newList.push(element);
+                    //        }
+                    //    });
+                    //    return newList;
+                    // 数组遍历方法： forEach some filter findindex 对数组中每一项元素进行遍历。
+                    // string.includes() es6新增的方法
+                    return this.list.filter(item => {
+                        if (item.name.includes(key)) {
+                            return item;
+                        }
+                    })
+
+                }
+
+            },
+            filters: { // 定义私有过滤器仅仅当前VM能够使用
+
+            },
+            directives: {
+                // 存放私有自定义指令
+                "fontweight": {
+                    bind: function(el, binding){
+                        el.style.fontWeight = binding.value;
+                    }
+                },
+                "fontsize": function(el, binding){
+                    // 直接使用function， 同时定义bind与updated阶段函数
+                        el.style.fontSize = parsInt(binding.value) + 'px';
+                    }
+            }
+
+        });
+    </script>
+</body>
+
+</html>
+
+<!-- 
+Vue指令之v-on的缩写和事件修饰符
+事件修饰符：
+.stop 阻止冒泡
+
+.prevent 阻止默认事件
+
+.capture 添加事件侦听器时使用事件捕获模式
+
+.self 只当事件在该元素本身（比如不是子元素）触发时触发回调
+
+.once 事件只触发一次
+
+在Vue中使用样式
+使用class样式
+数组
+<h1 :class="['red', 'thin']">这是一个邪恶的H1</h1>
+数组中使用三元表达式
+<h1 :class="['red', 'thin', isactive?'active':'']">这是一个邪恶的H1</h1>
+数组中嵌套对象
+<h1 :class="['red', 'thin', {'active': isactive}]">这是一个邪恶的H1</h1>
+直接使用对象
+<h1 :class="{red:true, italic:true, active:true, thin:true}">这是一个邪恶的H1</h1>
+使用内联样式
+直接在元素上通过 :style 的形式，书写样式对象
+<h1 :style="{color: 'red', 'font-size': '40px'}">这是一个善良的H1</h1>
+将样式对象，定义到 data 中，并直接引用到 :style 中
+在data上定义样式：
+data: {
+        h1StyleObj: { color: 'red', 'font-size': '40px', 'font-weight': '200' }
+}
+在元素中，通过属性绑定的形式，将样式对象应用到元素中：
+<h1 :style="h1StyleObj">这是一个善良的H1</h1>
+在 :style 中通过数组，引用多个 data 上的样式对象
+在data上定义样式：
+data: {
+        h1StyleObj: { color: 'red', 'font-size': '40px', 'font-weight': '200' },
+        h1StyleObj2: { fontStyle: 'italic' }
+}
+在元素中，通过属性绑定的形式，将样式对象应用到元素中：
+<h1 :style="[h1StyleObj, h1StyleObj2]">这是一个善良的H1</h1>
+Vue指令之v-for和key属性
+迭代数组
+<ul>
+  <li v-for="(item, i) in list">索引：{{i}} --- 姓名：{{item.name}} --- 年龄：{{item.age}}</li>
+</ul>
+迭代对象中的属性
+
+	循环遍历对象身上的属性
+
+    <div v-for="(val, key, i) in userInfo">{{val}} --- {{key}} --- {{i}}</div>
+
+迭代数字
+
+<p v-for="i in 10">这是第 {{i}} 个P标签</p>
+
+2.2.0+ 的版本里，当在组件中使用 v-for 时，key 现在是必须的。
+
+当 Vue.js 用 v-for 正在更新已渲染过的元素列表时，它默认用 “就地复用” 策略。如果数据项的顺序被改变，Vue将不是移动 DOM 元素来匹配数据项的顺序， 而是简单复用此处每个元素，并且确保它在特定索引下显示已被渲染过的每个元素。
+
+为了给 Vue 一个提示，以便它能跟踪每个节点的身份，从而重用和重新排序现有元素，你需要为每项提供一个唯一 key 属性。
+
+Vue指令之v-if和v-show
+一般来说，v-if 有更高的切换消耗而 v-show 有更高的初始渲染消耗。因此，如果需要频繁切换 v-show 较好，如果在运行时条件不大可能改变 v-if 较好。 
+
+
+
+过滤器
+Vue.js 允许你自定义过滤器，可被用作一些常见的文本格式化。过滤器可以用在两个地方：mustache 插值和 v-bind 表达式。过滤器应该被添加在 JavaScript 表达式的尾部，由“管道”符指示；
+调用格式： {{ name | nameope }}  nameope为后续处理函数，第一个参数为管道符号前的名称, 过滤器可以接收多个参数，可以多个过滤器同时使用。
+
+定义过滤器：
+Vue.filter('nameope(过滤器名称)', function(name){})
+
+键盘修饰符
+
+- .enter 
+- .tab
+- .delete 
+- .esc
+- .space 
+- .up 
+- .down 
+- .left 
+- .right
+
+
+1.x中自定义键盘修饰符【了解即可】
+
+Vue.directive('on').keyCodes.f2 = 113;
+
+2.x中自定义键盘修饰符
+通过Vue.config.keyCodes.名称 = 按键值来自定义案件修饰符的别名：
+
+Vue.config.keyCodes.f2 = 113;
+
+使用自定义的按键修饰符：
+
+<input type="text" v-model="name" @keyup.f2="add">
+
+自定义指令
+
+
+
+
+-->

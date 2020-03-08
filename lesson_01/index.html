@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基本vue代码与MVVM的理解</title>
+    <!-- 导入vue包 -->
+    <script src="../../../lib/vue.js"></script>
+    <style>
+        [v-cloak]{
+            display: none;
+        }
+
+        p{
+            color: pink;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 使用v-cloak解决插值表达式闪烁问题 -->
+        <p v-cloak>{{ msg }}</p>
+        <p v-text="msg"></p>
+        <!-- v-text 默认无闪烁问题 -->
+        <!-- v-text 会覆盖元素中原本内容， 插值表达式只替换占位符中包含的内容 -->
+        <p v-html="msg1"></p>
+        <!-- v-bind 是vue中用于绑定属性的指令 -->
+        <input type="button" value="按钮" v-bind:title="title">
+        <!-- v-bind 可以简写为“:[要绑定的属性]” -->
+        <input type="button" value="按钮" :title="title">
+        <!-- v-bind 中可以写合法的js表达式 -->
+        <input type="button" value="按钮" :title="title">
+
+        <!-- v-on 绑定事件指令 -->
+        <input type="button" value="按钮" :title="title" v-on:click="show" id="btn">
+        <!-- <script >
+            document.getElementById("btn").onclick = function(){
+                alert("hello vue by use js~")
+            }
+        </script> -->
+        <!-- v-on 缩写为@ -->
+        <input type="button" value="按钮" :title="title" @:click="show" id="btn">
+
+    </div>
+
+    <script>
+        // 创建vue实例
+        var vm = new Vue({
+            el: "#app",  //指定Vue实列要控制的区域
+            data: {  // data属性中存放el中要用到的数据
+                msg: 'hello vue ~',  // 通过 Vue 提供的指令，很方便的把数据渲染到页面上， 不再手动操作DOM元素。
+                msg1: "<h2> hello vue~ </h2>",
+                title: "这是一个按钮"
+
+            },
+            methods:{ // methods 属性中定义了当前vue实列中所有可用的方法
+                show: function(){
+                    alert("hello vue ~");
+                }
+
+            }
+        })
+    </script>
+
+
+    <div id="pmd">
+        <input type="button" value="开灯" :title="title_1" @click="turn_on">
+        <input type="button" value="关闭" :title="title_2" @click="turn_off">
+        <p id="pid" v-text="msg"></p>
+
+    </div>
+
+    <script>
+        //跑马灯练习
+        // 在VM实列中如果想要获取data上的数据需要通过this获取。
+        var vm_pmd = new Vue({
+            el: "#pmd",
+            data: {
+                msg: "行车不规范， 亲人两行泪~",
+                title_1: "这是开灯按钮",
+                title_2: "这是关灯按钮",
+                intervalId: null
+                // p_color: "color: pink;"
+            },
+            methods: {
+                turn_on: function(){
+                    // 当已经开启了计时器，直接返回，防止点击一次按钮就创建一个定时器
+                    if (this.intervalId != null){
+                        return;
+                    }
+                    this.intervalId = setInterval(() => {
+                        var start = this.msg.substring(0, 1);
+                        var end = this.msg.substring(1);
+                        this.msg = end + start;
+                    }, 400);
+                    // alert("打开开关~")
+                },
+                turn_off: function(){
+                    // alert("关闭开关~")
+                    clearInterval(this.intervalId); 
+                    // 关闭定时器后，需要将intervalID重新置为null， 否则停止后无法再启动。
+                    this.intervalId = null;
+
+                }
+
+            }
+        }) 
+    </script>
+    
+</body>
+</html>
