@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson_03</title>
+    <script src="../lib/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/fetch/3.0.0/fetch.js"></script>
+    <script src="https://cdn.bootcss.com/axios/0.19.2/axios.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- <h1 id="h1">{{ mesg }}</h1> -->
+        <input type="text" name="" id="" v-model='mesg'>
+        <input type="button" value="按钮" @click='getInfo'>
+
+    </div>
+
+    <script>
+        // $.ajax({
+        //     url: '',
+        //     success: function(data){
+        //         console.log(data)
+        //     }
+        // })
+        $.ajax({
+            url: 'http://10.10.10.105:8000/goods_list',
+            contentType: 'application/json',
+            cache: false,
+            method: 'GET',
+            dataType: 'json',
+            success: function(ret) {
+                console.log(ret);
+            }
+
+        });
+        // promise
+        var  p = new Promise(function(resolve, reject){
+            // 实现异步任务
+            setTimeout(() => {
+                var flag = true;
+                if (flag){
+                    resolve('hello');
+                }else{
+                    reject('Erro')
+                }
+            }, 100);
+
+        })
+
+        p.then(function(data){
+            console.log(data)
+        }, function(erro){ 
+            console.log(erro)
+
+        })
+
+        // promise ajax
+        function queryData(url) {
+            var p = new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState !=4) {return;} // 过滤readyStat不为4的状态
+                    if (xhr.readyState ==4 && xhr.status == 200){
+                        resolve(xhr.responseText);
+                    }else{
+                        reject('Server Error');
+                    } 
+                };
+                xhr.open('get', url);
+                xhr.send(null);
+            });
+            return p;
+        }
+        // 发起单个请求
+        queryData('http://10.10.10.105:8000/goods_list').then(function (data) {
+            console.log(data)
+        }, function (error) {
+            console.log(error)
+            
+        })
+
+        // 发起多个请求
+        queryData('http://10.10.10.105:8000/goods/1').then(function (data) {
+            console.log(data);
+            return queryData('http://10.10.10.105:8000/goods/2');
+        })
+        .then(function (data) {
+            console.log(data);
+            return queryData('http://10.10.10.105:8000/goods/3');  
+        })
+        .then(function (data) {
+            console.log(data);
+        })
+
+        // 使用fetch-api发起请求
+            /*
+            Fetch API 基本用法
+                fetch(url).then()
+                第一个参数请求的路径   Fetch会返回Promise   所以我们可以使用then 拿到请求成功的结果 
+            */
+        fetch('http://10.10.10.105:8000/goods_list').then(function (ret) {
+            return ret.text() // text()方法属于fetchAPI的一部分，它返回一个Promise实例对象，用于获取后台返回的数据
+            
+        }).then(function (data) {
+            //   在这个then里面我们能拿到最终的数据  
+            console.log(data)            
+        })
+
+        // axios 发起请求
+        axios.get('http://10.10.10.105:8000/goods/3').then(function(ret){ 
+            // 拿到 ret 是一个对象      所有的对象都存在 ret 的data 属性里面
+            // 注意data属性是固定的用法，用于获取后台的实际数据
+            // console.log(ret.data)
+            console.log(ret, ret.data, ret.status)
+        })
+    
+        axios.get('http://10.10.10.105:8000/goods/',{
+            parms:{
+                id:3
+            }
+        }).then(function(ret){ 
+            // 拿到 ret 是一个对象      所有的对象都存在 ret 的data 属性里面
+            // 注意data属性是固定的用法，用于获取后台的实际数据
+            // console.log(ret.data)
+            console.log(ret, ret.data, ret.status)
+        })
+
+        new Vue({
+            el: '#app',
+            data: {
+                mesg: ''
+            },
+            methods: {
+                show: function () {
+                    console.log('hello methods ~')
+                },
+                getInfo: function(){
+                    // 发起get请求
+                    
+                }
+
+            },
+            filters: {
+
+            },
+            directives: {
+
+            },
+
+
+
+        })
+    </script>
+</body>
+
+</html>
+
+<!-- 
+    vue发送请求可以使用vue-resource 与axios
+
+ -->

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理案例</title>
+    <script src="../lib/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/fetch/3.0.0/fetch.js"></script>
+    <script src="https://cdn.bootcss.com/axios/0.19.2/axios.js"></script>
+</head>
+<body>
+    <div id="app">
+        <book-manage></book-manage>
+    </div>
+
+    <template id="panel">
+        <div>
+            <div class="panel panel-primary">
+                  <div class="panel-heading">
+                        <h3 class="panel-title">图书管理系统</h3>
+                  </div>
+                  <div class="panel-body form-inline">
+                    <label for="">Id:
+                        <input type="text" name="" class="form-control" v-model='id'>
+                    </label>
+    
+                    <label for="">Name:
+                        <!-- <input type="text" name="" id="" class="form-control" v-model='name'>  -->
+                        <!-- 键盘修饰符： -->
+                        <input type="text" name="" class="form-control" v-model='name' @keyup.enter='add()'>
+                    </label>
+                    <input type="button" value="添加" class="btn btn-primary" @click='add()'>
+                    <!-- vue 中绑定事件加括号可以在括号中传参 -->
+    
+                    <label for="">搜索:
+                        <!-- <input type="text" name="" id="search" class="form-control" v-model='key' v-focus v-color> -->
+                        <!-- 自定义指令时，通过binding对象中属性获取 -->
+                        <input type="text" name="" id="search" class="form-control" v-model='key_word'>
+                    </label>   
+                  </div>
+            </div>
+            
+            
+        </div>
+    </template>
+
+    <template id="booklist">
+        <div>
+            <table class="table table-bordered table-">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Ctime</th>
+                        <th>Operation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in books" :key="index">
+                    <!-- <tr v-for="item in search(key_word)" :key="item.id"> -->
+                        <td v-text="item.id"></td>
+                        <td>{{item.name}}</td>
+                        <td v-text="item.price"></td>
+                        <!-- <td>{{ item.ctime | dateFormat }}</td> -->
+                        <td>
+                            <a href="http://" target="_blank" rel="noopener noreferrer" @click.prevent='del(index)'>删除</a>
+                            <a href="http://" target="_blank" rel="noopener noreferrer" @click.prevent='mod(index)'>修改</a>
+
+                        </td>
+                      
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+    <template id="bookmanage">
+        <div>
+            <panel  @pquery-data='queryData'></panel>
+            <!-- 一定要记住不要用驼峰命名啊 -->
+            <book-list :books='books' @pquery-data='queryData'></book-list> 
+            
+        </div>
+    </template>
+
+    <script type="module">
+
+        
+        axios.defaults.baseURL = 'http://10.10.10.105:8000/';
+        var Panel = {
+            template: '#panel',
+            props: [],
+            data: function(){
+                return {
+                    'key_word': '',
+                    'name': '',
+                    'id': ''
+                }
+            },
+            methods: {
+                // handle: function(){
+                //     //2、传递数据方，通过一个事件触发hub.$emit(方法名，传递的数据)   触发兄弟组件的事件
+                //     vm.$emit('key-event', 1);
+                // },
+                async add(){
+                    var ret = await axios.post('add_good', {
+                        name: this.name,
+                        id: this.id,
+                        price: 2000,
+                        num: 2,
+                        img: 'img/1.jpg'
+                    });
+                    if (ret.status == 200){
+                        this.$emit('pquery-data')
+                    }
+
+                },
+            },
+        };
+        var BookList = {
+            template: '#booklist',
+            props: ['books', 'key_word'],
+            methods: {
+                search(key) {
+                    //    var newList = []
+                    //    this.list.forEach(element => {
+                    //        if (element.name.indexOf(key) != -1){
+                    //             newList.push(element);
+                    //        }
+                    //    });
+                    //    return newList;
+                    // 数组遍历方法： forEach some filter findindex 对数组中每一项元素进行遍历。
+                    // string.includes() es6新增的方法
+                    // console.log(this.key)
+                    
+                    return this.books.filter(item => {
+                        if (item.name.includes(key)) {
+                            return item;
+                        }
+                    })
+
+
+                },
+                async del(id_){
+                    var ret = await axios.delete('goods', {params:{
+                        id: id_
+                    }});
+                    if (ret.status == 200){
+
+                        this.$emit('pquery-data')
+                        console.log('delete success!')
+                    }
+                }
+            },
+            data: function(){
+                return {
+                    // show_books: this.search(key),
+                    
+                }
+            },
+            // mounted() {
+            //     vm.$on('key-event', (val) => {
+            //         this.key_word += val;
+            //     });
+            // },
+        };
+
+
+        
+        Vue.component('book-manage', {
+            template: '#bookmanage',
+            components: {
+                'panel': Panel,
+                'book-list': BookList
+            },
+            data: function(){
+                return  {
+                    'books': '',
+                    'book_name': '',
+                    'book_id': '',
+                    'key_word': ''
+                }
+            },
+            methods: {
+                queryData: async function(){
+                    var ret = await axios.get('goods_list');
+                    this.books = ret.data;
+                    console.log('get all books');
+
+                },
+            },
+            mounted: function(){
+                this.queryData()
+            }
+            
+
+        })    
+        var vm = new Vue({
+            el: '#app',
+        });
+        
+
+    </script>
+    
+</body>
+</html>

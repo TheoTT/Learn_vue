@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson_03</title>
+    <script src="../lib/vue.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <h1 id="h1">{{ mesg }}</h1>
+        <!-- <input type="text" name="" id="" v-model='mesg'> -->
+        <input type="button" value="按钮" @click='modMesg'>
+
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                mesg: 'hello world ~'
+
+            },
+            methods: {
+                show: function () {
+                    console.log('hello methods ~')
+                },
+                modMesg: function(){
+                    this.mesg = 'mod html ~'
+                }
+
+            },
+            filters: {
+
+            },
+            directives: {
+
+            },
+
+            // 创建期间（初始化阶段）有两个生命周期函数：beforCreate(), created(),beforMount(), mounted()
+
+            beforeCreate() {
+                //实例刚在内存中被创建出来，还未初始化好vm中data、methods属性。
+                // console.log(this.msg);
+
+            },
+            created() {
+                // 实例已经在内存中创建完毕，data与methods属性已经创建ok，此时还没有开始编译模板。
+                console.log(this.mesg);
+
+            },
+            beforeMount() {
+                // 此时已经完成模板编译， 还未挂载至页面中。
+                console.log(document.getElementById('h1').innerText);
+
+            },
+            mounted() {
+                // 已经编译好模板，并挂载至页面中的指定容器。
+                console.log(document.getElementById('h1').innerText);
+
+            },
+            // 运行期间生命周期函数：beforUpdate(), updated()
+            beforeUpdate() {
+                // 实例状态更新前执行此函数，此时data中状态值是最新的，但界面中显示的数据还是旧的。（页面重新渲染DOM前）
+                console.log(document.getElementById('h1').innerText + 'html');
+                console.log(this.mesg + 'data');
+
+            },
+            updated() {
+                // 实例状态更新前执行此函数，此时data中状态值是最新的，但界面中显示的数据也是新的，页面重新渲染DOM前完毕。
+                console.log(document.getElementById('h1').innerText + 'html');
+                console.log(this.mesg + 'data');
+            },
+
+            // 销毁期间什么周期函数：beforDestroy(), destroyed()
+            beforeDestroy() {
+                // 实列销毁前调用， 此时实例仍然完全可用。
+                console.log(document.getElementById('h1').innerText + 'html');
+                console.log(this.mesg + 'data');
+            },
+            destroyed() {
+                // 实例销毁后调用， 调用后实例所有东西均会解除绑定，所有监听器被移除，所有的子实例销毁。
+                console.log(document.getElementById('h1').innerText + 'html');
+                console.log(this.mesg + 'data');
+            }
+
+
+
+
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Document</title>
+    <!-- <script src='../lib/vue.js'></script> -->
+    <script src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js'></script>
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css' rel='stylesheet'>
+    <script src='https://cdn.jsdelivr.net/npm/vue-resource@1.5.1'></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+
+    <style>
+        /* 配置路由选中高亮， router-link提供了默认类 router-link-active(链接激活类)*/
+        .router-link-active{
+            background-color: royalblue;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='app'>
+        <!-- 使用路由 -->
+        <!-- <a href="#/login">login</a>
+        <a href="#/register">registe</a> -->
+
+        <!-- router-link 默认渲染为一个a标签 -->
+        <router-link to='/login' tag='span'>登录</router-link>
+        <router-link to='/register'>注册</router-link>
+
+        <!-- 这是vue-router 提供的元素， 为占位符 -->
+        <router-view></router-view>
+    </div>
+
+    <template id="login">
+        <div>
+            <label for="">
+                用户名：
+                <input type="text" name="username" >
+            </label>
+            <label for="">
+                密码：
+                <input type="password" name="username" >
+            </label>
+        </div>
+</template>
+
+<template id="register">
+    <div>
+        <label for="">
+            用户名：
+            <input type="text" name="username" >
+        </label>
+        <label for="">
+            密码：
+            <input type="password" name="username" >
+        </label>
+        <label for="">
+            确认密码：
+            <input type="password" name="username">
+        </label>
+    </div>
+</template>
+    <script>
+        // 创建组件对象
+        var login = {
+            template: '#login'
+        }
+        var register = {
+            template: '#register'
+        }
+        // 创建路由对象
+        var routerObj = new VueRouter({
+            routes: [
+                // 存放路由匹配规则， 每个规则均为一个对象，有两个属性：
+                // 属性1： path  表示监听哪个路由链接地址
+                // 属性2： component, 路由对应的组件, 必须为组件模板对象，不能放组件名称
+                {
+                    path: '/login',
+                    component: login
+                },
+                {
+                    path: '/register',
+                    component: register
+                },
+                {
+                    // 路由重定向
+                    // path: '/',  //不推荐多个路由指向同一个组件
+                    path: '/',
+                    rediract: '/login'
+                },
+                // 路由规则中自定义参数
+                {
+                    
+
+                }
+
+            ],
+            linkActiveClass: 'myactive', // 用于自定义链接激活类
+            
+        })
+        var vm = new Vue({
+            el: '#app',
+            data: {},
+            router: routerObj,
+            methods: {},
+            components: {},
+            filters: {},
+            directives: {},
+        });
+    </script>
+</body>
+
+</html>
